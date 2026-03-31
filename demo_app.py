@@ -12,7 +12,7 @@ skills_scaler = joblib.load('notebook/demo_artifacts/skills_mlb.pkl')
 target_scaler = joblib.load('notebook/demo_artifacts/target_career_le.pkl')
 
 # Define input fields
-with st.container():
+with st.container(border=True):
     st.subheader("Enter Your Details")
     
     education = st.selectbox("Degree*", options=["BCA", "BSc", "BTech", "Diploma", "MCA", "MBA"])
@@ -59,7 +59,8 @@ with st.container():
             df_interest_cert_edu = pd.DataFrame(input_interest_cert_edu, columns=edu_interest_cert_scaler.get_feature_names_out(['education', 'interests', 'certification']))
             final_input_df = pd.concat([input_df, df_skills, df_interest_cert_edu], axis=1).drop(columns=["skills", "interests", "certification", "education"], axis=1)
 
-            # Show the final input DataFrame
-            st.subheader("Processed Input Data")
-            st.dataframe(final_input_df)
+            # Make prediction
+            prediction = model.predict(final_input_df)
+            predicted_career = target_scaler.inverse_transform(prediction)[0]
+            st.success(f"Recommended Career: {predicted_career}")
 
