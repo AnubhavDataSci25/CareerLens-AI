@@ -100,6 +100,11 @@ class DataTransformation:
             num_features = ['experience_years']
             cat_features_ohe = ['education', 'interests', 'certification']
             skills_feature_mlb = ['skills']
+
+            num_pipeline = Pipeline(steps=[
+                ('imputer', SimpleImputer(strategy='median')),
+            ])
+
             cat_pipeline_ohe = Pipeline(steps=[
                 ('imputer', SimpleImputer(strategy="constant", fill_value="NA")),
                 ('onehot', OneHotEncoder(handle_unknown='ignore', sparse_output=False, drop='first')),
@@ -107,10 +112,14 @@ class DataTransformation:
 
             skills_pipeline_mlb = MultiLabelBinarizerTransformer()
 
+            # Only include the intended numeric and categorical feature pipelines.
+            # Drop any unspecified columns (e.g. id fields) so string values
+            # don't get passthrough into the numeric model inputs.
             preprocessor = ColumnTransformer(transformers=[
+                ('num', num_pipeline, num_features),
                 ('cat_ohe', cat_pipeline_ohe, cat_features_ohe),
                 ('skills_mlb', skills_pipeline_mlb, skills_feature_mlb),
-            ], remainder='passthrough')
+            ], remainder='drop')
 
             return preprocessor
 
@@ -124,6 +133,10 @@ class DataTransformation:
             train_df = pd.read_csv(train_path)
             test_df = pd.read_csv(test_path)
             logging.info("Train and Test data read successfully")
+
+            # Remove user_id column if exists as it is not a useful feature and can cause issues in transformation
+            train_df = train_df.drop(columns=['user_id'], axis=1, errors='ignore')
+            test_df = test_df.drop(columns=['user_id'], axis=1, errors='ignore')
 
             # Normalize list-like fields before transformer.
             for df in [train_df, test_df]:
