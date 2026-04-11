@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaushal AI – Career Recommender</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <!-- Bootstrap Icons -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --brand-gradient: linear-gradient(135deg, #6c63ff 0%, #48c6ef 100%);
+      --card-radius: 1rem;
+    }
+
+    body {
+      background: #f0f4ff;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* ── Hero header ── */
+    .hero {
+      background: var(--brand-gradient);
+      color: #fff;
+      padding: 3rem 1rem 2.5rem;
+      text-align: center;
+      border-radius: 0 0 2rem 2rem;
+      box-shadow: 0 4px 24px rgba(108, 99, 255, 0.25);
+    }
+    .hero h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    /* ── Main card ── */
+    .main-card {
+      background: #fff;
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 32px rgba(72, 198, 239, 0.12);
+      padding: 2.5rem 2rem;
+      margin-top: -1.5rem;
+    }
+
+    /* ── Section labels ── */
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6c63ff;
+      margin-bottom: 0.5rem;
+    }
+
+    /* ── Skills grid ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.45rem;
+    }
+    .skill-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.7rem;
+      border: 1.5px solid #dee2e6;
+      border-radius: 50rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 0.82rem;
+      user-select: none;
+    }
+    .skill-chip:hover {
+      border-color: #6c63ff;
+      background: #f3f1ff;
+    }
+    .skill-chip input[type="checkbox"] {
+      accent-color: #6c63ff;
+      width: 14px;
+      height: 14px;
+    }
+    .skill-chip.selected {
+      border-color: #6c63ff;
+      background: #ebe9ff;
+      color: #4a42d4;
+      font-weight: 600;
+    }
+
+    /* ── Range slider ── */
+    #experience_years {
+      accent-color: #6c63ff;
+    }
+
+    /* ── Submit button ── */
+    .btn-predict {
+      background: var(--brand-gradient);
+      border: none;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 0.75rem 2.5rem;
+      border-radius: 50rem;
+      box-shadow: 0 4px 16px rgba(108, 99, 255, 0.35);
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-predict:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      color: #fff;
+    }
+    .btn-predict:active {
+      transform: translateY(0);
+    }
+
+    /* ── Result card ── */
+    .result-card {
+      background: linear-gradient(135deg, #f0edff 0%, #e0f7fe 100%);
+      border: 1.5px solid #b5aefc;
+      border-radius: var(--card-radius);
+      padding: 1.8rem 2rem;
+    }
+    .result-card .career-badge {
+      display: inline-block;
+      background: var(--brand-gradient);
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 700;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 3px 12px rgba(108, 99, 255, 0.3);
+    }
+
+    /* ── Error alert ── */
+    .alert-danger {
+      border-radius: var(--card-radius);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      color: #999;
+      font-size: 0.82rem;
+      margin: 2rem 0 1rem;
+    }
+
+    /* ── Responsive tweaks ── */
+    @media (max-width: 576px) {
+      .main-card {
+        padding: 1.5rem 1rem;
+      }
+      .hero h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════ HERO ══════════ -->
+  <div class="hero">
+    <h1><i class="bi bi-rocket-takeoff-fill me-2"></i>Kaushal AI</h1>
+    <p class="mb-0">AI-Powered Career Recommendation System</p>
+  </div>
+
+  <div class="container" style="max-width: 860px;">
+    <div class="main-card mt-4 mb-5">
+
+      <!-- ═══ RESULT / ERROR ═══ -->
+      {% if prediction %}
+      <div class="result-card mb-4 text-center">
+        <p class="section-label mb-1">🎯 Your Recommended Career</p>
+        <div class="career-badge">{{ prediction }}</div>
+        <p class="mt-3 mb-0 text-muted" style="font-size:0.88rem;">
+          <i class="bi bi-lightbulb me-1 text-warning"></i>
+          Add more relevant skills to fine-tune your prediction.
+        </p>
+      </div>
+      {% endif %}
+
+      {% if error %}
+      <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <!-- ═══ FORM ═══ -->
+      <form method="POST" id="careerForm" novalidate>
+
+        <div class="row g-4">
+
+          <!-- Col 1 -->
+          <div class="col-md-6">
+            <!-- Education -->
+            <div class="mb-3">
+              <p class="section-label"><i class="bi bi-mortarboard me-1"></i>Education</p>
+              <select class="form-select" name="education" required>
+                {% for edu in education_options %}
+                <option value="{{ edu }}"
+                  {% if form_data.get('education') == edu %}selected{% endif %}>
+                  {{ edu }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Experience -->
+            <div class="mb-3">
+              <p class="section-label">
+                <i class="bi bi-briefcase me-1"></i>Years of Experience
+                <span class="badge bg-primary ms-2" id="expLabel">
+                  {{ form_data.get('experience_years', 1) }} yr(s)
+                </span>
+              </p>
+              <input
+                type="range"
+                class="form-range"
+                name="experience_years"
+                id="experience_years"
+                min="0" max="15" step="1"
+                value="{{ form_data.get('experience_years', 1) }}"
+              />
+              <div class="d-flex justify-content-between" style="font-size:0.75rem; color:#999;">
+                <span>0 yrs</span><span>15 yrs</span>
+              </div>
+            </div>
+
+            <!-- Certification -->
+            <div class="mb-3">
+              <p class="section-label"><i class="bi bi-patch-check me-1"></i>Certification</p>
+              <select class="form-select" name="certification">
+                {% for val, label in certification_options %}
+                <option value="{{ val }}"
+                  {% if form_data.get('certification') == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- Col 2 -->
+          <div class="col-md-6">
+            <!-- Area of Interest -->
+            <div class="mb-3">
+              <p class="section-label"><i class="bi bi-compass me-1"></i>Area of Interest</p>
+              <select class="form-select" name="interests" required>
+                {% for val, label in interest_options %}
+                <option value="{{ val }}"
+                  {% if form_data.get('interests') == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Skills info -->
+            <div>
+              <p class="section-label">
+                <i class="bi bi-tools me-1"></i>Skills
+                <span class="badge bg-secondary ms-2" id="skillCount">
+                  {{ form_data.get('skills', [])|length }} selected
+                </span>
+              </p>
+              <p class="text-muted mb-2" style="font-size:0.8rem;">
+                Click the chips below to select all that apply.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills grid (full width) -->
+        <div class="skills-grid mb-4" id="skillsGrid">
+          {% for skill in skills_options %}
+          {% set checked = skill in form_data.get('skills', []) %}
+          <label class="skill-chip {% if checked %}selected{% endif %}">
+            <input
+              type="checkbox"
+              name="skills"
+              value="{{ skill }}"
+              {% if checked %}checked{% endif %}
+            />
+            {{ skill|title }}
+          </label>
+          {% endfor %}
+        </div>
+
+        <!-- Submit -->
+        <div class="text-center">
+          <button type="submit" class="btn btn-predict" id="submitBtn">
+            <i class="bi bi-search me-2"></i>Analyze My Career
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer>
+    <p>Built with <i class="bi bi-heart-fill text-danger"></i> · Kaushal AI © 2025</p>
+  </footer>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ── Experience slider label ──
+    const slider = document.getElementById('experience_years');
+    const expLabel = document.getElementById('expLabel');
+    slider.addEventListener('input', () => {
+      expLabel.textContent = slider.value + ' yr(s)';
+    });
+
+    // ── Skill chips toggle ──
+    const skillCount = document.getElementById('skillCount');
+    document.querySelectorAll('.skill-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const cb = chip.querySelector('input[type="checkbox"]');
+        // toggle is handled by the label, update visual class
+        setTimeout(() => {
+          chip.classList.toggle('selected', cb.checked);
+          const total = document.querySelectorAll('.skill-chip input:checked').length;
+          skillCount.textContent = total + ' selected';
+        }, 0);
+      });
+    });
+
+    // ── Spinner on submit ──
+    document.getElementById('careerForm').addEventListener('submit', function () {
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyzing…';
+    });
+
+    // ── Scroll to result on load (if prediction exists) ──
+    {% if prediction or error %}
+    window.addEventListener('DOMContentLoaded', () => {
+      const result = document.querySelector('.result-card, .alert-danger');
+      if (result) result.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    {% endif %}
+  </script>
+</body>
+</html>

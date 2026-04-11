@@ -17,7 +17,7 @@ class PredictPipeline:
             target_encoder = load_objects(file_path=target_encoder_path)
             data_scaled = preprocessor.transform(features)
             pred = model.predict(data_scaled)
-            pred = target_encoder.inverse_transform(pred)
+            pred = target_encoder.inverse_transform(pred.astype(int))
             return pred
         except Exception as e:
             raise CustomException(e, sys)
@@ -45,7 +45,7 @@ class CustomData:
                 'experience_years': [self.experience_years],
                 'skills': [', '.join(self.skills)],
                 'interests': [self.interests],
-                'certifications': [self.certifications]
+                'certification': [self.certifications]
             }
             return pd.DataFrame(data_dict)
         except Exception as e:
