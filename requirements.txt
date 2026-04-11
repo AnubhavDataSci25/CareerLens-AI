@@ -8,4 +8,6 @@ xgboost
 streamlit
 joblib
 lightgbm
+Flask
+
 -e .
