@@ -95,17 +95,17 @@ class DataTransformation:
             return [str(x).strip() for x in value]
         return [str(value)]
 
-    def get_data_transformer_obj(self, available_columns=None):
+    def get_data_transformer_obj(self):
         try:
             num_features = ['experience_years', 'projects_count']
             cat_features_ohe = ['education', 'interests', 'certification', 'learning_source', 'dominant_project_domain']
             skills_feature_mlb = ['skills']
 
-            if available_columns is not None:
-                available_columns = set(available_columns)
-                num_features = [col for col in num_features if col in available_columns]
-                cat_features_ohe = [col for col in cat_features_ohe if col in available_columns]
-                skills_feature_mlb = [col for col in skills_feature_mlb if col in available_columns]
+            # if available_columns is not None:
+            #     available_columns = set(available_columns)
+            #     num_features = [col for col in num_features if col in available_columns]
+            #     cat_features_ohe = [col for col in cat_features_ohe if col in available_columns]
+            #     skills_feature_mlb = [col for col in skills_feature_mlb if col in available_columns]
 
             num_pipeline = Pipeline(steps=[
                 ('imputer', SimpleImputer(strategy='median')),
@@ -121,16 +121,20 @@ class DataTransformation:
             # Only include the intended numeric and categorical feature pipelines.
             # Drop any unspecified columns (e.g. id fields) so string values
             # don't get passthrough into the numeric model inputs.
-            transformers = []
+            # transformers = []
 
-            if num_features:
-                transformers.append(('num', num_pipeline, num_features))
-            if cat_features_ohe:
-                transformers.append(('cat_ohe', cat_pipeline_ohe, cat_features_ohe))
-            if skills_feature_mlb:
-                transformers.append(('skills_mlb', skills_pipeline_mlb, skills_feature_mlb))
+            # if num_features:
+            #     transformers.append(('num', num_pipeline, num_features))
+            # if cat_features_ohe:
+            #     transformers.append(('cat_ohe', cat_pipeline_ohe, cat_features_ohe))
+            # if skills_feature_mlb:
+            #     transformers.append(('skills_mlb', skills_pipeline_mlb, skills_feature_mlb))
 
-            preprocessor = ColumnTransformer(transformers=transformers, remainder='drop')
+            preprocessor = ColumnTransformer(transformers=[
+                ('num', num_pipeline, num_features),
+                ('cat_ohe', cat_pipeline_ohe, cat_features_ohe),
+                ('skills_mlb', skills_pipeline_mlb, skills_feature_mlb),
+            ], remainder='drop')
 
             return preprocessor
 
@@ -157,7 +161,7 @@ class DataTransformation:
                     df['interests'] = df['interests'].apply(self._parse_interests)
 
             logging.info("Obtaining preprocessing Object")
-            preprocessing_obj = self.get_data_transformer_obj(input_features_train.columns)
+            preprocessing_obj = self.get_data_transformer_obj()
 
             target_col_name = 'target_career'
 

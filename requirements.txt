@@ -9,5 +9,7 @@ streamlit
 joblib
 lightgbm
 Flask
+pytest
+pytest-cov
 
 -e .
